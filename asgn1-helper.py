@@ -116,31 +116,37 @@ def count_n_grams():
     print (len(bi_count))
     print (count)
 
+    # write_english_example(tri_probabilities=tri_probabilities)
+
     return tri_count, bi_count
 
 def calculate_perplexity(tri_count, bi_count):
-    alpha = 0.4
-    vv = 30
+    tri_probabilities=defaultdict(int) #the probabilities for all trigrams
+    alpha = 0.4     # smoothing parameter
+    vv = 30         # alphabet, number of characters (alphabet=26, #, ., 0, space)
     count = 0
-    pp = 0
-    ee = 0
+    pp = 0          # average perplexity
+    ee = 0          # average entropy
     for i in range(len(validation_data)):
         line = validation_data[i]
         trigrams = []
         print (trigrams)
-        for j in range(len(line)-(3)):
+        for j in range(len(line)-(2)):
             trigram = line[j:j+3]
             trigrams.append(trigram)
 
         entropy = 0
+        tri_probabilities=defaultdict(int) #the probabilities for all trigrams
         print (len(trigrams))
-        for i in range(len(trigrams)):
-            tri = trigrams[i]
+        for j in range(len(trigrams)):
+            tri = trigrams[j]
             bi = tri[:2]
             # print (tri_count[tri], "-", bi_count[bi], "-", len(bi_count))
             # print ((tri_count[tri] + alpha), (bi_count[bi] + (vv * alpha)))
 
             prob = (tri_count[tri] + alpha) / (bi_count[bi] + (vv * alpha))
+            if tri not in tri_probabilities.items():
+                tri_probabilities[trigrams[j]] = prob
             # print(prob)
             if (prob > 1):
                 print ("SHIT")
@@ -150,6 +156,12 @@ def calculate_perplexity(tri_count, bi_count):
             entropy -= np.log2(prob)
             # print (entropy)
             count+=1
+
+        if i == 0:
+            print ("TRI LEN: ", len(trigrams))
+            print (sorted(trigrams))
+            write_trigrams(tri_probabilities=tri_probabilities)
+
 
         entropy = entropy / len(trigrams)
         print ("Entropy: ", entropy)
@@ -193,7 +205,7 @@ def calculate_perplexity(tri_count, bi_count):
     # print ("Perplexity: ", perplexity)
 
 
-def write_trigrams():
+def write_trigrams(tri_probabilities):
     sorted_dict = sorted(tri_probabilities.items())
     with open(outfile, 'w') as f:
         for i in range(len(sorted_dict)):
@@ -201,9 +213,10 @@ def write_trigrams():
             f.write('\t')
             f.write(str('%.3e' % Decimal(sorted_dict[i][1])))
             f.write('\n')
-    write_english_example(sorted_dict=sorted_dict)
+    # write_english_example(sorted_dict=sorted_dict)
 
-def write_english_example(sorted_dict):
+def write_english_example(tri_probabilities):
+    sorted_dict = sorted(tri_probabilities.items())
     with open('model_en.en', 'w') as f:
         for i in range(len(sorted_dict)):
             t = sorted_dict[i][0]
