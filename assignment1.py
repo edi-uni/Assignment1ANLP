@@ -12,13 +12,16 @@ import matplotlib.pyplot as plt
 
 
 # Split of data for "exercise 5"
-all_data = []
-training_data = []
-validation_data = []
-testing_data = []
+# all_data = []
+# training_data = []
+# validation_data = []
+# testing_data = []
 
 
-# Preprocess every line of the files ("exercise 1")
+'''
+EXERCISE 1
+'''
+# Preprocess every line of the files
 def preprocess_line(line):
     char_removed = re.sub('[^a-zA-Z0-9. ]', "", line)
     number_formated = re.sub('[0-9]', "0", char_removed)
@@ -36,30 +39,25 @@ if len(sys.argv) < 2:
 infile = sys.argv[1]    # input argument: the training file
 outfile = sys.argv[2]   # output argument: the model output
 
+
 # Process the training file
 def process_file():
-    with open(infile) as f:
-        for line in f:
-            line = preprocess_line(line)    # process the file
-            all_data.append(line)           # store all data (lines)
+    all_data = read_file(infile)
+
     '''
     EXERCISE 3
     '''
-    # use_base_model_ex3(data=all_data)       # "exercise 3" - uses all data from training file
+    # use_base_model_ex3(data=all_data)
 
     '''
     EXERCISE 4
     '''
-    # generate_random_strings(data=all_data)    # "exercise 4" - uses all data from training file
+    # generate_random_strings(data=all_data)
 
     '''
     EXERCISE 5
     '''
     compute_perplexity_test_file(data=all_data)
-
-    # split_data()                            # split data into training, validation and test sets
-    # build_model()                           # build language model
-
 
 
 '''
@@ -68,7 +66,8 @@ EXERCISE 3
 def use_base_model_ex3(data):
     tri_count, bi_count = count_n_grams(data=data)
     probabilities = calculate_probabilities(tri_count=tri_count, bi_count=bi_count)
-    write_english_example(tri_probabilities=probabilities)
+    write_all_probabilities(filename='model-all-prob.en', tri_probabilities=probabilities)
+    write_english_example(filename='model-ng-prob.en', tri_probabilities=probabilities)
 
 
 '''
@@ -76,88 +75,91 @@ EXERCISE 4
 '''
 def generate_random_strings(data):
     tri_count, bi_count = count_n_grams(data=data)
-    probabilities = calculate_probabilities(tri_count=tri_count, bi_count=bi_count)
-    generate_string(probabilities=probabilities, len=302)
-    print ('==========================================================================================')
+    our_probabilities = calculate_probabilities(tri_count=tri_count, bi_count=bi_count)
+    our_string = generate_string(probabilities=our_probabilities, len=302)
     their_probabilities = read_model()
-    generate_string(probabilities=their_probabilities, len=302)
+    their_string = generate_string(probabilities=their_probabilities, len=302)
+    write_generated_string(filename='random_strings.txt', string1=our_string, string2=their_string)
 
 
 '''
 EXERCISE 5
 '''
 def compute_perplexity_test_file(data):
-    en_data, es_data, de_data = read_all_files()
+    en_data = read_file('training.en')
+    es_data = read_file('training.es')
+    de_data = read_file('training.de')
+    # en_data, es_data, de_data = read_all_files()
     test_file_data = read_test_file();
-    tri_count, bi_count = count_n_grams(data=all_data)
-    # avg_perplexity = calculate_perplexity(data=test_file_data, tri_count=tri_count, bi_count=bi_count)
-    # print(avg_perplexity)
-    example_perplexity = calculate_perplexity(data=["##abaab#"], tri_count=tri_count, bi_count=bi_count)
+    tri_count, bi_count = count_n_grams(data=data)
+
+    example_perplexity = calculate_perplexity(data=["##abaab#"], tri_count=tri_count, bi_count=bi_count, alpha=0.4)
     print (example_perplexity)
 
-    en_values = compute_k_fold_validation(data=en_data)
+    en_values, en_alpha_values = compute_k_fold_validation(data=en_data)
     en_avg_perplexity = np.sum(en_values) / len(en_values)
+    en_best_alpha = np.sum(en_alpha_values) / len(en_alpha_values)
     print (en_values)
-    es_values = compute_k_fold_validation(data=es_data)
+    print (en_best_alpha)
+    es_values, es_alpha_values = compute_k_fold_validation(data=es_data)
     es_avg_perplexity = np.sum(es_values) / len(es_values)
+    es_best_alpha = np.sum(es_alpha_values) / len(es_alpha_values)
     print (es_values)
-    de_values = compute_k_fold_validation(data=de_data)
+    print (es_best_alpha)
+    de_values, de_alpha_values = compute_k_fold_validation(data=de_data)
     de_avg_perplexity = np.sum(de_values) / len(de_values)
+    de_best_alpha = np.sum(de_alpha_values) / len(de_alpha_values)
     print (de_values)
+    print (de_best_alpha)
 
     x_grid = np.arange(start=0, stop=10, step=1)
 
     plt.clf()
-    plt.plot(x_grid, en_values, 'b-')
-    plt.plot(x_grid, es_values, 'r-')
-    plt.plot(x_grid, de_values, 'g-')
+    plt.plot(x_grid, en_values, 'b-', label='English Model')
+    plt.plot(x_grid, es_values, 'r-', label='Spanish Model')
+    plt.plot(x_grid, de_values, 'g-', label='German Model')
+    plt.legend()
     plt.show()
 
     x_grid_prime = np.arange(start=0, stop=3, step=1)
     yy = [en_avg_perplexity, es_avg_perplexity, de_avg_perplexity]
     plt.clf()
-    plt.bar(x_grid_prime, yy, color="blue")
+    plt.bar(1, en_avg_perplexity, color="blue", label='English Model: ' + str('%.3f' % en_avg_perplexity))
+    plt.bar(2, es_avg_perplexity, color="red", label='Spanish Model: ' + str('%.3f' % es_avg_perplexity))
+    plt.bar(3, de_avg_perplexity, color="green", label='German Model: ' + str('%.3f' % de_avg_perplexity))
+    plt.legend()
     plt.show()
 
 
-def read_all_files():
-    en_data = []
-    es_data = []
-    de_data = []
-    with open('training.en') as f:
+# Read file
+def read_file(filename):
+    data = []
+    with open(filename) as f:
         for line in f:
-            line = preprocess_line(line)
-            en_data.append(line)
+            line = preprocess_line(line)    # process the file
+            data.append(line)               # store data
 
-    with open('training.es') as f:
-        for line in f:
-            line = preprocess_line(line)
-            es_data.append(line)
-
-    with open('training.de') as f:
-        for line in f:
-            line = preprocess_line(line)
-            de_data.append(line)
-
-    return en_data, es_data, de_data
+    return data
 
 
+# Compute k-fold cross-validation
 def compute_k_fold_validation(data):
     values = []
+    alpha_values = []
     p = math.floor(len(data) / 10)    # 10% (validation set / testing set)
     r = len(data) - p
     for i in range(10):
         v = p * i
         training_data = data[:v] + data[v+p:]       # training_data
         validation_data = data[v:v+p]               # validation_data
-        avg_perplexity = build_model(training_data=training_data, validation_data=validation_data)
+        avg_perplexity, alpha_best = build_model(training_data=training_data, validation_data=validation_data)
+        alpha_values.append(alpha_best)
         values.append(avg_perplexity)
 
-    return values
+    return values, alpha_values
 
 
-
-# Split data into training, validation and test sets
+# Split data into training, validation and test sets    (UNUSED)
 def split_data():
     p = math.floor(len(all_data) / 10)  # 10% (validation set / testing set)
     r = len(all_data) - 2 * p           # 80% (training set)
@@ -170,18 +172,20 @@ def split_data():
 # Build language model
 def build_model(training_data, validation_data):
     tri_count, bi_count = count_n_grams(data=training_data)
-    avg_perplexity = calculate_perplexity(data=validation_data, tri_count=tri_count, bi_count=bi_count)
-    # print (avg_perplexity)
-    return (avg_perplexity)
+    avg_perplexity_min = 1000000
+    for i in range(10):
+        avg_perplexity = calculate_perplexity(data=validation_data, tri_count=tri_count, bi_count=bi_count, alpha=(i*0.1 + 0.1))
+        if avg_perplexity < avg_perplexity_min:
+            avg_perplexity_min = avg_perplexity
+            alpha_best = i*0.1 + 0.1
+    # avg_perplexity = avg_perplexity_sum/10
+    return avg_perplexity_min, alpha_best
 
 
 # Count trigrams and bigrams
 def count_n_grams(data):
     tri_count = defaultdict(int)        # count of all trigrams in input
     bi_count = defaultdict(int)         # count of all bigrams in input
-
-    # print ("LEN: ", len(data))
-    # print (data)
 
     for i in range(len(data)):
         line = data[i]
@@ -200,8 +204,8 @@ def count_n_grams(data):
     return tri_count, bi_count
 
 
-def calculate_perplexity(data, tri_count, bi_count):
-    alpha = 0.4     # smoothing parameter
+# Calculate perplexity
+def calculate_perplexity(data, tri_count, bi_count, alpha):
     vv = 30         # alphabet, number of characters (alphabet=26, #, ., 0, space)
     sum_perplexity = 0      # sum of perplexities from each line
     avg_perplexity = 0      # average perplexity
@@ -225,12 +229,8 @@ def calculate_perplexity(data, tri_count, bi_count):
 
         entropy = entropy_prime / len(trigrams)       # divide enntropy_prime by the number of trigrams
         perplexity = 2 ** entropy
-
-        # print ("Perplexity: ", perplexity)
         sum_perplexity += perplexity
-
     avg_perplexity = sum_perplexity / len(data)         # sum_perplexity divided by the length of data (row number)
-    # print ("AVG Perplexity: ", avg_perplexity)
 
     return avg_perplexity
 
@@ -246,10 +246,11 @@ def calculate_probabilities(tri_count, bi_count):
 
     return tri_probabilities
 
+
 # Write english example for "exercise 3"
-def write_english_example(tri_probabilities):
+def write_english_example(filename, tri_probabilities):
     sorted_dict = sorted(tri_probabilities.items())
-    with open('model_en.en', 'w') as f:
+    with open(filename, 'w') as f:
         for i in range(len(sorted_dict)):
             t = sorted_dict[i][0]
             if (t[:2] == 'ng'):
@@ -259,12 +260,21 @@ def write_english_example(tri_probabilities):
                 f.write('\n')
 
 
+# Write all probabilities to file
+def write_all_probabilities(filename, tri_probabilities):
+    sorted_dict = sorted(tri_probabilities.items())
+    with open(filename, 'w') as f:
+        for i in range(len(sorted_dict)):
+            f.write(sorted_dict[i][0])
+            f.write('\t')
+            f.write(str('%.3e' % Decimal(sorted_dict[i][1])))
+            f.write('\n')
+
+
+# Generate random string based on probabilities of trigrams
 def generate_string(probabilities, len):
     string = "##"
     actual_len = 2
-    alphabet = "abcdefghijklmnopqrstuvwxyz0#. "
-    # alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x']
-    # trigrams = probabilities.keys()
     while actual_len < len:
         keys = [k for k,v in probabilities.items() if k[:2] == string[-2:]]
         values = [v for k,v in probabilities.items() if k[:2] == string[-2:]]
@@ -275,15 +285,24 @@ def generate_string(probabilities, len):
             tri = np.random.choice(keys, p=scaled_values)
             string += tri[-1]
         else:
-            rand_char = random.choice(alphabet)
-            string += " "#rand_char
+            string += " "
 
         actual_len += 1
-
     string = string[2:]
 
-    print(string)
+    # print (string)
+    return string
 
+
+# Write random generated strings to file
+def write_generated_string(filename, string1, string2):
+    with open(filename, 'w') as f:
+        f.write(string1)
+        f.write('\n\n')
+        f.write(string2)
+
+
+# Read given model
 def read_model():
     tri_probabilities = defaultdict(int)
     with open('model-br.en') as f:
@@ -292,28 +311,22 @@ def read_model():
             value = float(line[4:])
             if (key not in tri_probabilities):
                 tri_probabilities[key] = value
-            # print (line)
-            # print (line[:3])
-            # print (float(line[4:]))
-
-    # for k,v in trigrams.items():
-    #     print(k, " - ", v)
 
     return tri_probabilities
 
 
+# Read given test file
 def read_test_file():
     test_file_data = []
     with open('test') as f:
         for line in f:
             line = preprocess_line(line)    # process the file
             test_file_data.append(line)     # store all data (lines)
-            # print (line)
-            # print ('==========================================================================================')
 
     return test_file_data
 
 
+# Calculate perplexity for "exercise 0"
 def calculate_perplexity_ex0():
     prob_arr = np.array([0.2, 0.7, 0.6, 0.25, 0.5, 0.1]);
     entropy = 0;
@@ -324,5 +337,4 @@ def calculate_perplexity_ex0():
 
 if __name__ == '__main__':
     process_file()
-    # write_trigrams()
     # calculate_perplexity_ex0()
