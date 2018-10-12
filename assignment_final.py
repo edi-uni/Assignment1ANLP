@@ -262,7 +262,7 @@ def calculate_probabilities(tri_count, bi_count):
         alph_comb[k]=tri_probabilities[k]
     for k,v in alph_comb.items():
         if (alph_comb[k] == 0):
-            alph_comb[k]= alpha / vv * alpha
+            alph_comb[k]= alpha / (bi_count[bi] + (vv * alpha))
     return alph_comb
 
 
