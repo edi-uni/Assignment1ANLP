@@ -11,6 +11,14 @@ from decimal import Decimal
 import matplotlib.pyplot as plt
 
 
+# Split of data for "exercise 5"
+# all_data = []
+# training_data = []
+# validation_data = []
+# testing_data = []
+# all_prob = defaultdict()       # probabilities for all possible combinations for the alphabet trigrams
+
+
 '''
 EXERCISE 1
 '''
@@ -97,21 +105,36 @@ def compute_perplexity_test_file(data):
     tri_count, bi_count = count_n_grams(data=data)
 
     en_values, en_best_alpha, en_perplexity_test_file, en_perplexity_test_file_alpha = compute_operations(data=en_data, test_file_data=test_file_data)
+    # tri_count, bi_count = count_n_grams(data=en_data)
+    # en_values, en_alpha_values = compute_k_fold_validation(data=en_data)
     en_avg_perplexity = np.sum(en_values) / len(en_values)
+    # en_best_alpha = np.sum(en_alpha_values) / len(en_alpha_values)
+    # en_perplexity_test_file = calculate_perplexity(data=test_file_data, tri_count=tri_count, bi_count=bi_count, alpha=1)
+    # en_perplexity_test_file_alpha = calculate_perplexity(data=test_file_data, tri_count=tri_count, bi_count=bi_count, alpha=en_best_alpha)
     print ("Perplexity EN: ", en_perplexity_test_file)
     print ("Perplexity EN (using best alpha): ", en_perplexity_test_file_alpha)
     print ("Perplexity values over the k-fold validation algorithm EN: ", en_values)
     print ("Best alpha from k-fold validation algorithm EN: ", en_best_alpha)
 
     es_values, es_best_alpha, es_perplexity_test_file, es_perplexity_test_file_alpha = compute_operations(data=es_data, test_file_data=test_file_data)
+    # tri_count, bi_count = count_n_grams(data=es_data)
+    # es_values, es_alpha_values = compute_k_fold_validation(data=es_data)
     es_avg_perplexity = np.sum(es_values) / len(es_values)
+    # es_best_alpha = np.sum(es_alpha_values) / len(es_alpha_values)
+    # es_perplexity_test_file = calculate_perplexity(data=test_file_data, tri_count=tri_count, bi_count=bi_count, alpha=1)
+    # es_perplexity_test_file_alpha = calculate_perplexity(data=test_file_data, tri_count=tri_count, bi_count=bi_count, alpha=es_best_alpha)
     print ("Perplexity ES: ", es_perplexity_test_file)
     print ("Perplexity ES (using best alpha): ", es_perplexity_test_file_alpha)
     print ("Perplexity values over the k-fold validation algorithm ES: ", es_values)
     print ("Best alpha from k-fold validation algorithm ES: ", es_best_alpha)
 
     de_values, de_best_alpha, de_perplexity_test_file, de_perplexity_test_file_alpha = compute_operations(data=de_data, test_file_data=test_file_data)
+    # tri_count, bi_count = count_n_grams(data=de_data)
+    # de_values, de_alpha_values = compute_k_fold_validation(data=de_data)
     de_avg_perplexity = np.sum(de_values) / len(de_values)
+    # de_best_alpha = np.sum(de_alpha_values) / len(de_alpha_values)
+    # de_perplexity_test_file = calculate_perplexity(data=test_file_data, tri_count=tri_count, bi_count=bi_count, alpha=1)
+    # de_perplexity_test_file_alpha = calculate_perplexity(data=test_file_data, tri_count=tri_count, bi_count=bi_count, alpha=de_best_alpha)
     print ("Perplexity DE: ", de_perplexity_test_file)
     print ("Perplexity DE (using best alpha): ", de_perplexity_test_file_alpha)
     print ("Perplexity values over the k-fold validation algorithm DE: ", de_values)
@@ -119,15 +142,46 @@ def compute_perplexity_test_file(data):
 
     # Grid with values from k-fold validation
     plot_grid(en_values=en_values, es_values=es_values, de_values=de_values)
+    # x_grid = np.arange(start=0, stop=10, step=1)
+    # plt.clf()
+    # plt.plot(x_grid, en_values, 'b-', label='English Model')
+    # plt.plot(x_grid, es_values, 'r-', label='Spanish Model')
+    # plt.plot(x_grid, de_values, 'g-', label='German Model')
+    # plt.legend()
+    # plt.show()
 
     # Bar grid for average perplexity after k-fold validation
     plot_bar(en_perplexity=en_avg_perplexity, es_perplexity=es_avg_perplexity, de_perplexity=de_avg_perplexity)
-
+    # x_grid_prime = np.arange(start=0, stop=3, step=1)
+    # yy = [en_avg_perplexity, es_avg_perplexity, de_avg_perplexity]
+    # plt.clf()
+    # plt.bar(1, en_avg_perplexity, color="blue", label='English Model: ' + str('%.3f' % en_avg_perplexity))
+    # plt.bar(2, es_avg_perplexity, color="red", label='Spanish Model: ' + str('%.3f' % es_avg_perplexity))
+    # plt.bar(3, de_avg_perplexity, color="green", label='German Model: ' + str('%.3f' % de_avg_perplexity))
+    # plt.legend()
+    # plt.show()
+    #
     # Bar grid for average perplexity for testing file with alpha=1
     plot_bar(en_perplexity=en_perplexity_test_file, es_perplexity=es_perplexity_test_file, de_perplexity=de_perplexity_test_file)
-
+    # x_grid_prime = np.arange(start=0, stop=3, step=1)
+    # yy = [en_perplexity_test_file, es_perplexity_test_file, de_perplexity_test_file]
+    # plt.clf()
+    # plt.bar(1, en_perplexity_test_file, color="blue", label='English Model: ' + str('%.3f' % en_perplexity_test_file))
+    # plt.bar(2, es_perplexity_test_file, color="red", label='Spanish Model: ' + str('%.3f' % es_perplexity_test_file))
+    # plt.bar(3, de_perplexity_test_file, color="green", label='German Model: ' + str('%.3f' % de_perplexity_test_file))
+    # plt.legend()
+    # plt.show()
+    #
     # Bar grid for average perplexity for testing file with alpha=best_alpha
     plot_bar(en_perplexity=en_perplexity_test_file_alpha, es_perplexity=es_perplexity_test_file_alpha, de_perplexity=de_perplexity_test_file_alpha)
+    # x_grid_prime = np.arange(start=0, stop=3, step=1)
+    # yy = [en_perplexity_test_file_alpha, es_perplexity_test_file_alpha, de_perplexity_test_file_alpha]
+    # plt.clf()
+    # plt.bar(1, en_perplexity_test_file_alpha, color="blue", label='English Model: ' + str('%.3f' % en_perplexity_test_file_alpha))
+    # plt.bar(2, es_perplexity_test_file_alpha, color="red", label='Spanish Model: ' + str('%.3f' % es_perplexity_test_file_alpha))
+    # plt.bar(3, de_perplexity_test_file_alpha, color="green", label='German Model: ' + str('%.3f' % de_perplexity_test_file_alpha))
+    # plt.legend()
+    # plt.show()
 
 
 # Compute all necessary operations to obtain perplexity
@@ -259,7 +313,6 @@ def calculate_perplexity(data, tri_count, bi_count, alpha):
 
     return avg_perplexity
 
-
 # Calculate perplexity (OLD VERSION)
 '''
 def calculate_perplexity(data, tri_count, bi_count, alpha):
@@ -307,7 +360,6 @@ def calculate_probabilities(tri_count, bi_count, alpha):
             tri_probabilities[k] = alpha / (bi_count[bi] + (vv * alpha))
     return tri_probabilities
 
-
 # Write english example for "exercise 3"
 def write_english_example(filename, tri_probabilities):
     sorted_dict = sorted(tri_probabilities.items())
@@ -350,7 +402,6 @@ def generate_string(probabilities, len):
 
         actual_len += 1
     string += "#"
-
     return string
 
 
